@@ -1,0 +1,27 @@
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SHAREHUB_SECURE_COOKIE:false}
+      timeout: 8h
+spring:
+  datasource:
+    url: ${SHAREHUB_DB_URL:jdbc:h2:file:./data/sharehub;MODE=MySQL;DATABASE_TO_LOWER=TRUE}
+    username: ${SHAREHUB_DB_USER:sa}
+    password: ${SHAREHUB_DB_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 22MB
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+sharehub:
+  demo: ${SHAREHUB_DEMO:false}
+  media: ${SHAREHUB_MEDIA:./data/media}
+  admin-user: ${SHAREHUB_ADMIN_USER:}
+  admin-password: ${SHAREHUB_ADMIN_PASSWORD:}

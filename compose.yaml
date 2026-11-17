@@ -1,0 +1,40 @@
+services:
+  database:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: sharehub
+      MYSQL_USER: sharehub
+      MYSQL_PASSWORD: ${SHAREHUB_DB_PASSWORD:?Set SHAREHUB_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${SHAREHUB_DB_ROOT_PASSWORD:?Set SHAREHUB_DB_ROOT_PASSWORD}
+      TZ: UTC
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  server:
+    build: ./server
+    environment:
+      SHAREHUB_DB_URL: jdbc:mysql://database:3306/sharehub?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+      SHAREHUB_DB_USER: sharehub
+      SHAREHUB_DB_PASSWORD: ${SHAREHUB_DB_PASSWORD}
+      SHAREHUB_ADMIN_USER: ${SHAREHUB_ADMIN_USER:-admin}
+      SHAREHUB_ADMIN_PASSWORD: ${SHAREHUB_ADMIN_PASSWORD:?Set SHAREHUB_ADMIN_PASSWORD}
+      SHAREHUB_SECURE_COOKIE: ${SHAREHUB_SECURE_COOKIE:-false}
+      SHAREHUB_MEDIA: /app/data/media
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - media:/app/data/media
+  web:
+    build: ./web
+    ports:
+      - "${SHAREHUB_BIND:-127.0.0.1}:8085:80"
+    depends_on:
+      - server
+volumes:
+  database:
+  media:
